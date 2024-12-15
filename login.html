@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Form</title>
+    <style>
+         body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url("https://www.google.com/search?sca_esv=c9e8cb97e6ce2a06&sca_upv=1&sxsrf=ADLYWILty9mpenPgARy4kJwev-SpixCDjg:1727776665649&q=bg+form&udm=2&fbs=AEQNm0CvspUPonaF8UH5s_LBD3JPX4RSeMPt9v8oIaeGMh2T2D1DyqhnuPxLgMgOaYPYX7OtOF4SxbM4YPsyWUMdeXRPZhCDnq-5Z-yoSNSuzzuqe-AJEcgubqbZZMyt_grANnsjG430usNqxcfNkddhKrAc7ZdUqqRTe-LY6ueoAHENlT69FE4GZz5taUYsEQezNmmRFXnASP-Ran4mbpidC5JNYU_oow&sa=X&ved=2ahUKEwi52qDT9eyIAxWmR2wGHUHUHkUQtKgLegQIExAB&biw=1470&bih=837&dpr=2#vhid=Zf9t0xsmWgFICM&vssid=mosaic");
+            background-size: cover;
+            background-position: center;
+            transition: fadeIn 2s;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 320px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        input, button {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ff5100;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #ff6f00;
+            outline: none;
+        }
+
+        button {
+            background-color: #ff5100;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #ff6f00;
+        }
+
+        h2 {
+            text-align: center;
+            color: #870000;
+            margin-bottom: 20px;
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+
+        .auth-btn {
+            font-weight: bold;
+        }
+
+        .create-btn {
+            background-color: #870000;
+            transition: background-color 0.3s ease;
+        }
+
+        .create-btn:hover {
+            background-color: #b90000;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 400px) {
+            .form-container {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2><strong>Login / Create User</strong></h2>
+        <form id="auth-form">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit" class="auth-btn">Login</button>
+            <button type="button" class="auth-btn create-btn">Create User</button>
+        </form>
+    </div>
+
+    <script>
+        // Get form elements
+        const form = document.getElementById("auth-form");
+        const usernameInput = document.getElementById("username");
+        const passwordInput = document.getElementById("password");
+        const createUserButton = document.querySelector(".create-btn");
+
+        // Function to send a POST request to the server
+        const sendRequest = async (url, data) => {
+            try {
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    // On successful response, redirect to homepage
+                    window.location.href = "/";
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error: ${errorData.message}`);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Something went wrong!");
+            }
+        };
+
+        // Handle form submission for login
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            // Send login request to server
+            sendRequest("/loginreq", { username, password });
+        });
+
+        // Handle user creation button click
+        createUserButton.addEventListener("click", () => {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            if (username && password) {
+                // Send create user request to the same route
+                sendRequest("/loginreq", { username, password });
+            } else {
+                alert("Please enter both username and password.");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subject Selection</title>
+    <style>
+        .weather-widget {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 300px;
+            padding: 20px;
+            background-color: #f3f3f3;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+            margin-bottom: 20px; /* Added margin for spacing */
+        }
+        .weather-header {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .weather-info {
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .loading {
+            font-size: 16px;
+            color: #888;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column; /* Changed to column to stack elements */
+            height: 100vh;
+            margin: 0;
+            background-image: url("https://www.google.com/search?sca_esv=c9e8cb97e6ce2a06&sca_upv=1&sxsrf=ADLYWILty9mpenPgARy4kJwev-SpixCDjg:1727776665649&q=bg+form&udm=2&fbs=AEQNm0CvspUPonaF8UH5s_LBD3JPX4RSeMPt9v8oIaeGMh2T2D1DyqhnuPxLgMgOaYPYX7OtOF4SxbM4YPsyWUMdeXRPZhCDnq-5Z-yoSNSuzzuqe-AJEcgubqbZZMyt_grANnsjG430usNqxcfNkddhKrAc7ZdUqqRTe-LY6ueoAHENlT69FE4GZz5taUYsEQezNmmRFXnASP-Ran4mbpidC5JNYU_oow&sa=X&ved=2ahUKEwi52qDT9eyIAxWmR2wGHUHUHkUQtKgLegQIExAB&cshid=1727776745850690&biw=1470&bih=837&dpr=2#vhid=Zf9t0xsmWgFICM&vssid=mosaic");
+        }
+
+        .form-container {
+            background: #fff5f5;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ff5100;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #870000;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #254f00;
+        }
+
+        button:disabled {
+            background-color: gray;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="weather-widget">
+        <div id="weather-header" class="weather-header">Weather in Dehradun</div>
+        <div id="weather-info" class="weather-info loading">Loading...</div>
+    </div>
+
+    <div class="form-container">
+        <h2><strong><center>Course Selection</center></strong></h2>
+        <form id="Form" enctype="multipart/form-data">
+            <input type="text" id="name" placeholder="Name" pattern="[A-Za-z ]*" required>
+            <input type="date" id="age" placeholder="dob" min="2000-01-01" max="2010-12-31" required>
+            <input type="text" id="address" placeholder="address" required>
+            <input type="text" id="mobile" placeholder="mobile" required pattern="\d{10}">
+            <select id="subject" required>
+                <option value="" disabled selected>Select a subject</option>
+                <option value="Backend">Backend</option>
+                <option value="AI">AI</option>
+                <option value="EDGE">EDGE</option>
+                <option value="DataNetworks">Data Networks</option>
+            </select>
+            <input type="file" id="mediaImage" accept="image/*" required>
+            <button type="button" id="otp-button">Get auth OTP</button>
+            <input type="text" id="otp" placeholder="otp" required pattern="\d{6}" disabled>
+            <button type="submit" id="submit-button" style="display: none;">Submit</button>
+        </form>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            // Fetch weather data when the page loads
+            fetch('/weather')
+                .then(response => response.json())
+                .then(data => {
+                    // Parse and display weather details
+                    const weatherInfoDiv = document.getElementById('weather-info');
+                    const temp = (data.main.temp - 273.15).toFixed(1);  // Convert from Kelvin to Celsius
+                    const description = data.weather[0].description;
+                    const humidity = data.main.humidity;
+                    const windSpeed = data.wind.speed;
+                    
+                    weatherInfoDiv.innerHTML = `
+                        Temperature: ${temp} °C <br>
+                        Condition: ${description} <br>
+                        Humidity: ${humidity}% <br>
+                        Wind Speed: ${windSpeed} m/s
+                    `;
+                    weatherInfoDiv.classList.remove('loading');
+                })
+                .catch(error => {
+                    // Handle errors
+                    document.getElementById('weather-info').innerHTML = 'Error fetching weather data.';
+                    console.error('Error:', error);
+                });
+        });
+
+        document.getElementById('otp-button').addEventListener('click', function(event) {
+            event.preventDefault();
+
+            // Collect form data
+            const mobile = document.getElementById('mobile').value;
+            const formData = new FormData();
+            formData.append('mobile', mobile);
+
+            // Send the data for OTP request
+            fetch("http://127.0.0.1:3000/otp", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                // Check if the status is 200 (OK)
+                if (!(response.status == 200)) {
+                    console.log(response.status);
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                } else {
+                    document.getElementById("submit-button").style.display = "block";
+                    document.getElementById("otp").disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while requesting the OTP.');
+            });
+        });
+
+        document.getElementById('Form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Collect form data
+            const name = document.getElementById('name').value;
+            const dob = document.getElementById('age').value;
+            const subject = document.getElementById('subject').value;
+            const address = document.getElementById('address').value;
+            const mediaImage = document.getElementById('mediaImage').files[0];
+            
+            // Calculate age
+            var birth = new Date(dob);
+            var birthMillis = birth.getTime();
+            const now = new Date();
+            let yearsDifference = now.getFullYear() - birth.getFullYear();
+            let monthsDifference = Math.abs(now.getMonth() - birth.getMonth());
+
+            // Display result
+            document.getElementById('result').textContent = `Hello ${name}, you are ${Math.floor(yearsDifference)} years and ${monthsDifference} months old, you live at ${address} and your favorite subject is ${subject}.`;
+
+            // Create FormData object to handle file upload
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('dob', dob);
+            formData.append('address', address);
+            formData.append('subject', subject);
+            formData.append('mediaImage', mediaImage);
+
+            // Send the data
+            fetch("http://127.0.0.1:3000/uploadDetails", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                // Handle the response
+                if (data.message) {
+                    alert(data.message);
+                } else if (data.error) {
+                    alert(`Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
